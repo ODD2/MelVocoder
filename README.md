@@ -1,85 +1,49 @@
-# HiFi-GAN: Generative Adversarial Networks for Efficient and High Fidelity Speech Synthesis
+# Artist20 Singer Prediction
+## Description
+This repository includes the project for the second homework of the course "Deep Learning for Music Analysis and Generation" lectured by Prof. Yang at the National Taiwan University. The main goals of this work is to train a melvocoder on the [M4Singer](https://m4singer.github.io/) dataset. Given an mel-spectrogram of a singing segment, the model should generate the waveform corresponding to the sepctrogram. This project relies on [HiFi-GAN](https://github.com/jik876/hifi-gan) and [sobel-operator-pytorch](https://github.com/chaddy1004/sobel-operator-pytorch), big thanks to the authors.
 
-### Jungil Kong, Jaehyeon Kim, Jaekyoung Bae
-
-In our [paper](https://arxiv.org/abs/2010.05646), 
-we proposed HiFi-GAN: a GAN-based model capable of generating high fidelity speech efficiently.<br/>
-We provide our implementation and pretrained models as open source in this repository.
-
-**Abstract :**
-Several recent studies on speech synthesis have employed generative adversarial networks (GANs) to produce raw waveforms. 
-Although such methods improve the sampling efficiency and memory usage, 
-their sample quality has not yet reached that of autoregressive and flow-based generative models. 
-In this study, we propose HiFi-GAN, which achieves both efficient and high-fidelity speech synthesis. 
-As speech audio consists of sinusoidal signals with various periods, 
-we demonstrate that modeling periodic patterns of an audio is crucial for enhancing sample quality. 
-A subjective human evaluation (mean opinion score, MOS) of a single speaker dataset indicates that our proposed method 
-demonstrates similarity to human quality while generating 22.05 kHz high-fidelity audio 167.9 times faster than 
-real-time on a single V100 GPU. We further show the generality of HiFi-GAN to the mel-spectrogram inversion of unseen 
-speakers and end-to-end speech synthesis. Finally, a small footprint version of HiFi-GAN generates samples 13.4 times 
-faster than real-time on CPU with comparable quality to an autoregressive counterpart.
-
-Visit our [demo website](https://jik876.github.io/hifi-gan-demo/) for audio samples.
-
-
-## Pre-requisites
-1. Python >= 3.6
-2. Clone this repository.
-3. Install python requirements. Please refer [requirements.txt](requirements.txt)
-4. Download and extract the [LJ Speech dataset](https://keithito.com/LJ-Speech-Dataset/).
-And move all wav files to `LJSpeech-1.1/wavs`
-
+## Create Environment 
+```bash
+pip install -r requirements.txt
+```
 
 ## Training
+The file structure of the dataset is expected to be something similar like this:
 ```
-python train.py --config config_v1.json
+./dataset
+    |- audios/
+        |- 0001.mp3
+        |- 0002.mp3
+        |- 0003.mp3
+        ...
+    |- split
+        |- train.txt
+        |- valid.txt
 ```
-To train V2 or V3 Generator, replace `config_v1.json` with `config_v2.json` or `config_v3.json`.<br>
-Checkpoints and copy of the configuration file are saved in `cp_hifigan` directory by default.<br>
-You can change the path by adding `--checkpoint_path` option.
-
-
-## Pretrained Model
-You can also use pretrained models we provide.<br/>
-[Download pretrained models](https://drive.google.com/drive/folders/1-eEYTB5Av9jNql0WGBlRoi-WH2J7bp5Y?usp=sharing)<br/> 
-Details of each folder are as in follows:
-
-|Folder Name|Generator|Dataset|Fine-Tuned|
-|------|---|---|---|
-|LJ_V1|V1|LJSpeech|No|
-|LJ_V2|V2|LJSpeech|No|
-|LJ_V3|V3|LJSpeech|No|
-|LJ_FT_T2_V1|V1|LJSpeech|Yes ([Tacotron2](https://github.com/NVIDIA/tacotron2))|
-|LJ_FT_T2_V2|V2|LJSpeech|Yes ([Tacotron2](https://github.com/NVIDIA/tacotron2))|
-|LJ_FT_T2_V3|V3|LJSpeech|Yes ([Tacotron2](https://github.com/NVIDIA/tacotron2))|
-|VCTK_V1|V1|VCTK|No|
-|VCTK_V2|V2|VCTK|No|
-|VCTK_V3|V3|VCTK|No|
-
-
-## Inference from wav file
-1. Make `test_files` directory and copy wav files into the directory.
-2. Run the following command.
+The following command starts the training process with configuration 'config/config_v1.json' and save the checkpoint to the 'checkpoint/test/' folder:
+```bash
+python train.py \
+--config=configs/config_v1.json \
+--input_wavs_dir=dataset/audios \
+--input_training_file=./dataset/split/train.txt \
+--input_validation_file=./dataset/split/valid.txt \
+--checkpoint_path=./checkpoints/test
 ```
-python inference.py --checkpoint_file [generator checkpoint file path]
+## Inference
+### Preprocess Audio Files for Mel-Spectrogram
+Please change the source and destination folders and run the 'preprocess.py' file to derive the mel-spectrograms.
+```bash
+python -m preprocess
 ```
-Generated wav files are saved in `generated_files` by default.<br>
-You can change the path by adding `--output_dir` option.
-
-
-## Inference for end-to-end speech synthesis
-1. Make `test_mel_files` directory and copy generated mel-spectrogram files into the directory.<br>
-You can generate mel-spectrograms using [Tacotron2](https://github.com/NVIDIA/tacotron2), 
-[Glow-TTS](https://github.com/jaywalnut310/glow-tts) and so forth.
-2. Run the following command.
+### Generate the Waveforms
+- Please download the model weights and config from Google Drive: [config.json](https://drive.google.com/file/d/1sUmhYvu5oOiLlacI_GVGLv34hUSy5JOe/view?usp=sharing), [weights](https://drive.google.com/file/d/1lI5X329HsT-4vDLJFEIkhUooo-DotGqG/view?usp=sharing)
+- Inference with the following command:
+```bash
+python -m inference \
+# the folder path for the mel-spectrograms
+--input_mels_dir=$input_mel_spec_folder \ 
+# the folder path to save the generated audios
+--output_dir=$output_audio_folder \ 
+# the path that includes both the weight and the config
+--checkpoint_file=$generator_checkpoint_path 
 ```
-python inference_e2e.py --checkpoint_file [generator checkpoint file path]
-```
-Generated wav files are saved in `generated_files_from_mel` by default.<br>
-You can change the path by adding `--output_dir` option.
-
-
-## Acknowledgements
-We referred to [WaveGlow](https://github.com/NVIDIA/waveglow), [MelGAN](https://github.com/descriptinc/melgan-neurips) 
-and [Tacotron2](https://github.com/NVIDIA/tacotron2) to implement this.
-

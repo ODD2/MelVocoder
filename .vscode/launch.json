@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Test",
+            "type": "python",
+            "request": "launch",
+            "module": "test",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Train",
+            "type": "python",
+            "request": "launch",
+            "module": "train",
+            "justMyCode": false,
+            "args": [
+                "--config=configs/config_v1.json",
+                "--input_wavs_dir=dataset/audio/train",
+                "--input_mels_dir=dataset/mel/train",
+                "--input_training_file=./dataset/split/train_split1.txt",
+                "--input_validation_file=./dataset/split/train_split2.txt",
+                "--checkpoint_path=./checkpoints/test",
+                "--test"
+            ]
+        },
+        {
+            "name": "Python: Inference",
+            "type": "python",
+            "request": "launch",
+            "module": "inference",
+            "justMyCode": true,
+            "args": [
+                "--input_mels_dir=./dataset/mel/valid/",
+                "--output_dir=inference_results/in3h6cid_5K_valid",
+                "--checkpoint_file=checkpoints/in3h6cid/g_00005000",
+            ]
+        }
+    ]
+}
