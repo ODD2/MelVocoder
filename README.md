@@ -1,4 +1,4 @@
-# Artist20 Singer Prediction
+# M4Singer MelVocoder
 ## Description
 This repository includes the project for the second homework of the course "Deep Learning for Music Analysis and Generation" lectured by Prof. Yang at the National Taiwan University. The main goals of this work is to train a melvocoder on the [M4Singer](https://m4singer.github.io/) dataset. Given an mel-spectrogram of a singing segment, the model should generate the waveform corresponding to the sepctrogram. This project relies on [HiFi-GAN](https://github.com/jik876/hifi-gan) and [sobel-operator-pytorch](https://github.com/chaddy1004/sobel-operator-pytorch), big thanks to the authors.
 
